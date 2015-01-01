@@ -1,5 +1,6 @@
 import javafx.application.Platform;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
@@ -27,12 +28,9 @@ public class WindowBoard {
         setFood();
         direction = Direction.RIGHT;
 
-        stage.setScene(new Scene(new VBox()));
+        stage.setScene(new Scene(new Group(),5,5));
         stage.setTitle("Floating");
-        stage.setX(0);
-        stage.setY(0);
-        stage.setWidth(5);
-        stage.setHeight(5);
+        stage.sizeToScene();
         stage.getScene().setOnKeyTyped(e -> handleInput(e.getCharacter()));
         stage.requestFocus();
         stage.show();
