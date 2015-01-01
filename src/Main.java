@@ -15,7 +15,7 @@ public class Main extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                if (now - last[0] > 1e8){
+                if (now - last[0] > 5 * 1e7){
                     board.update();
                     last[0] = now;
                 }

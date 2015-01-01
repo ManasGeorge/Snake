@@ -43,6 +43,14 @@ public class CanvasUnit {
         this.next = next;
     }
 
+    public double getX(){
+        return x;
+    }
+
+    public double getY(){
+        return y;
+    }
+
     public void draw(GraphicsContext gc){
         gc.fillRect(x,y,SIZE,SIZE);
     }
