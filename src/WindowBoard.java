@@ -1,64 +1,62 @@
 import javafx.application.Platform;
-import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.geometry.Pos;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.util.Random;
 
-public class CanvasBoard{
-    private Canvas canvas;
-    private CanvasUnit head;
-    private CanvasUnit tail;
-    private CanvasUnit food;
+public class WindowBoard {
+    private Stage stage;
+    private WindowUnit head;
+    private WindowUnit tail;
+    private WindowUnit food;
     private boolean finished = false;
     private Direction direction;
 
-    public CanvasBoard(double width, double height, Stage stage){
-        canvas = new Canvas(width, height);
-        head = new CanvasUnit(
-                (int)(getWidth() * CanvasUnit.SIZE/2) / (int)CanvasUnit.SIZE,
-                (int)(getHeight() * CanvasUnit.SIZE/2) / (int)CanvasUnit.SIZE,
+    public WindowBoard(Stage stage){
+        head = new WindowUnit(
+                (int)((getWidth() - WindowUnit.SIZE) / 2 / WindowUnit.SIZE) * WindowUnit.SIZE,
+                (int)((getHeight() - WindowUnit.SIZE) / 2 / WindowUnit.SIZE) * WindowUnit.SIZE,
                 null);
+
         tail = head;
         setFood();
         direction = Direction.RIGHT;
 
-        Group root = new Group();
-        root.setOnKeyTyped(e -> handleInput(e.getCharacter()));
-
-        root.getChildren().add(canvas);
-        stage.setScene(new Scene(root));
+        stage.setScene(new Scene(new VBox()));
         stage.setTitle("Floating");
-        stage.setMinHeight(600);
-        stage.setMinWidth(600);
+        stage.setX(0);
+        stage.setY(0);
+        stage.setWidth(5);
+        stage.setHeight(5);
+        stage.getScene().setOnKeyTyped(e -> handleInput(e.getCharacter()));
+        stage.requestFocus();
         stage.show();
-
-        root.requestFocus();
+        this.stage = stage;
     }
 
     public void update() {
         if (!finished) {
-            drawBoard();
             move();
-
-            if (head.equals(food)) {
-                CanvasUnit temp = new CanvasUnit(tail);
-                move();
-                temp.setNext(tail);
-                tail = temp;
-                setFood();
-            }
-
             if (outOfBounds() || intersectsBody()) {
                 finished = true;
                 gameOver();
             }
+            if (head.equals(food)) {
+                WindowUnit temp = new WindowUnit(tail);
+                move();
+                temp.setNext(tail);
+                tail = temp;
+                food.close();
+                setFood();
+            } else {
+                drawBoard();
+            }
+            stage.requestFocus();
         }
     }
 
@@ -78,24 +76,24 @@ public class CanvasBoard{
 
     private void setFood(){
         Random r = new Random();
-        food = new CanvasUnit(
-                r.nextInt((int)(getWidth() / CanvasUnit.SIZE)) * CanvasUnit.SIZE,
-                r.nextInt((int)(getHeight() / CanvasUnit.SIZE)) * CanvasUnit.SIZE,
+        food = new WindowUnit(
+                r.nextInt((int)((getWidth() - WindowUnit.SIZE) / (WindowUnit.SIZE))) * WindowUnit.SIZE,
+                r.nextInt((int)((getHeight() - WindowUnit.SIZE) / (WindowUnit.SIZE))) * WindowUnit.SIZE,
                 null
         );
     }
 
     private void drawBoard(){
-        getGraphicsContext2D().clearRect(0,0,getWidth(),getHeight());
-        for(CanvasUnit i = tail; i != null; i = i.getNext()){
-            i.draw(getGraphicsContext2D());
+        for(WindowUnit i = tail; i != null; i = i.getNext()){
+            i.close();
+            i.open();
         }
 
-        food.draw(getGraphicsContext2D());
+        food.open();
     }
 
     private void move(){
-        for(CanvasUnit i = tail; i != head; i = i.getNext()){
+        for(WindowUnit i = tail; i != head; i = i.getNext()){
             i.move();
         }
 
@@ -103,12 +101,12 @@ public class CanvasBoard{
     }
 
     private boolean outOfBounds(){
-        return (head.getX() < 0 || head.getX() >= getWidth()
-                || head.getY() < 0 || head.getY() >= getHeight());
+        return (head.getX() < 0 || head.getX() + WindowUnit.SIZE >= getWidth()
+                || head.getY() < 0 || head.getY() + WindowUnit.SIZE >= getHeight());
     }
 
     private boolean intersectsBody(){
-        for(CanvasUnit i = tail; i != head; i = i.getNext())
+        for(WindowUnit i = tail; i != head; i = i.getNext())
             if(head.equals(i)) return true;
         return false;
     }
@@ -131,14 +129,11 @@ public class CanvasBoard{
     }
 
     private double getWidth(){
-        return canvas.getWidth();
+        return Screen.getPrimary().getBounds().getWidth();
     }
 
     private double getHeight(){
-        return canvas.getHeight();
-    }
-
-    private GraphicsContext getGraphicsContext2D(){
-        return canvas.getGraphicsContext2D();
+        return Screen.getPrimary().getBounds().getHeight();
     }
 }
+
