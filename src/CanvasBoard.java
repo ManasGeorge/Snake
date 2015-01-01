@@ -1,6 +1,4 @@
-import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.input.KeyEvent;
 
 import java.util.Random;
 
@@ -12,17 +10,13 @@ public class CanvasBoard extends Canvas implements Board {
 
     public CanvasBoard(double width, double height){
         super(width, height);
-        head = new CanvasUnit(getHeight()/2, getWidth()/2, null);
+        head = new CanvasUnit(
+                (int)(getWidth() * CanvasUnit.SIZE/2) / (int)CanvasUnit.SIZE,
+                (int)(getHeight() * CanvasUnit.SIZE/2) / (int)CanvasUnit.SIZE,
+                null);
         tail = head;
         setFood();
         direction = Direction.RIGHT;
-
-        setOnKeyTyped(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                handleInput(event.getCharacter());
-            }
-        });
     }
 
     @Override
@@ -33,6 +27,7 @@ public class CanvasBoard extends Canvas implements Board {
         if (head.equals(food)) {
             CanvasUnit temp = new CanvasUnit(tail);
             move();
+            temp.setNext(tail);
             tail = temp;
             setFood();
         }
@@ -40,6 +35,7 @@ public class CanvasBoard extends Canvas implements Board {
 
     @Override
     public void handleInput(String in){
+        System.out.println(in);
         switch(in){
             case "h": direction = Direction.LEFT; break;
             case "j": direction = Direction.DOWN; break;
@@ -51,13 +47,14 @@ public class CanvasBoard extends Canvas implements Board {
     private void setFood(){
         Random r = new Random();
         food = new CanvasUnit(
-                (int)((r.nextDouble() * getWidth()) / CanvasUnit.SIZE),
-                (int)((r.nextDouble() * getHeight()) / CanvasUnit.SIZE),
+                r.nextInt((int)(getWidth() / CanvasUnit.SIZE)) * CanvasUnit.SIZE,
+                r.nextInt((int)(getHeight() / CanvasUnit.SIZE)) * CanvasUnit.SIZE,
                 null
         );
     }
 
     private void drawBoard(){
+        getGraphicsContext2D().clearRect(0,0,getWidth(),getHeight());
         for(CanvasUnit i = tail; i != null; i = i.getNext()){
             i.draw(getGraphicsContext2D());
         }

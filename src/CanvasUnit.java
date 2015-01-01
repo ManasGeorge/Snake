@@ -39,7 +39,15 @@ public class CanvasUnit {
         return next;
     }
 
+    public void setNext(CanvasUnit next){
+        this.next = next;
+    }
+
     public void draw(GraphicsContext gc){
         gc.fillRect(x,y,SIZE,SIZE);
+    }
+
+    public boolean equals(CanvasUnit other){
+        return x == other.x && y == other.y;
     }
 }
